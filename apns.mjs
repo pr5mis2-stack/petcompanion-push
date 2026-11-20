@@ -121,7 +121,11 @@ async function main() {
   if (cmd === "send") {
     const targets = [["sandbox", process.env.CHANNEL_SANDBOX], ["production", process.env.CHANNEL_PRODUCTION]]
       .filter(([, c]) => c && c.trim());
-    if (!targets.length) throw new Error("CHANNEL_SANDBOX / CHANNEL_PRODUCTION 중 하나는 있어야 해요.");
+    if (!targets.length) {
+      // 아직 채널을 안 만든 상태: 실패로 표시하지 않고 넘어간다. (실패 알림 메일이 쌓이지 않도록)
+      console.log("채널 ID 가 아직 없어요. CHANNEL_SANDBOX / CHANNEL_PRODUCTION 을 넣으면 보내기 시작해요.");
+      return;
+    }
     let failed = 0;
     for (const [e, c] of targets) {
       try { await sendUpdate(e, c.trim()); } catch (err) { failed++; console.error("❌", err.message); }
