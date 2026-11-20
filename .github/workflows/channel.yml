@@ -1,0 +1,31 @@
+# 채널 만들기 / 목록 보기 (Actions 탭에서 손으로 실행)
+name: 가루 채널 관리
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "할 일"
+        type: choice
+        options: [create-channel, list-channels]
+        default: create-channel
+      env:
+        description: "환경 (Xcode 실행 = sandbox, TestFlight·앱스토어 = production)"
+        type: choice
+        options: [sandbox, production]
+        default: sandbox
+
+jobs:
+  manage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node apns.mjs ${{ inputs.action }} ${{ inputs.env }}
+        env:
+          APNS_KEY: ${{ secrets.APNS_KEY }}
+          APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
+          APNS_TEAM_ID: ${{ secrets.APNS_TEAM_ID }}
