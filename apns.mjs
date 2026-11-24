@@ -79,20 +79,21 @@ async function listChannels(env) {
 }
 
 async function sendUpdate(env, channel) {
-  // ActivityKit 은 Date 를 "2001-01-01 기준 초"로 읽는다.
-  const updatedAt = Date.now() / 1000 - 978307200;
+  // 앱의 ContentState 는 ts = 1970 기준 초(숫자) 하나만 받는다.
+  const now = Date.now() / 1000;
   const payload = JSON.stringify({
     aps: {
-      timestamp: Math.floor(Date.now() / 1000),
+      timestamp: Math.floor(now),
       event: "update",
-      "content-state": { updatedAt },
+      "content-state": { ts: now },
     },
   });
   const headers = {
     authorization: `bearer ${jwt()}`,
     "apns-push-type": "liveactivity",
     "apns-channel-id": channel,
-    "apns-priority": "5",
+    // 10 = 바로 전달 (화면이 꺼져 있어도 반영). 앱에 "자주 갱신" 허용을 켜 두었다.
+    "apns-priority": "10",
     "apns-expiration": "0",
     "content-type": "application/json",
   };
